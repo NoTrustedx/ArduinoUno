@@ -1,0 +1,52 @@
+//Funcionalidad de led
+#include <Servo.h>
+
+Servo miServo;
+int pinServo = 10;
+int pinBoton = 2;
+int pinLed = 7;
+
+bool estado = false;           // false: cerrado (0°), true: abierto (90°)
+bool botonPresionado = false; // control de flanco
+
+void setup() {
+  miServo.attach(pinServo);
+  pinMode(pinBoton, INPUT_PULLUP);
+  pinMode(pinLed, OUTPUT);
+  miServo.write(0); // Inicia en cerrado
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (digitalRead(pinBoton) == LOW) {
+    if (!botonPresionado) {
+      botonPresionado = true;    // detectamos una sola pulsación
+      estado = !estado;          // cambiamos de abierto a cerrado
+
+      if (estado) {
+        // ABRIR (0° a 90°) con LED parpadeando
+        for (int angulo = 0; angulo <= 90; angulo++) {
+          miServo.write(angulo);
+          digitalWrite(pinLed, HIGH);
+          delay(10);
+          digitalWrite(pinLed, LOW);
+          delay(20);
+        }
+        Serial.println("Puerta abierta");
+      } else {
+        // CERRAR (90° a 0°) con LED parpadeando
+        for (int angulo = 90; angulo >= 0; angulo--) {
+          miServo.write(angulo);
+          digitalWrite(pinLed, HIGH);
+          delay(10);
+          digitalWrite(pinLed, LOW);
+          delay(20);
+        }
+        Serial.println("Puerta cerrada");
+      }
+    }
+  } else {
+    botonPresionado = false;  // solo se permite un cambio cuando se suelta
+  }
+}
+
