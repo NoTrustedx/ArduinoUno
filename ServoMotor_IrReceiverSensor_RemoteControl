@@ -1,0 +1,43 @@
+##AbreLentamente el Servo
+#include <Servo.h>
+
+Servo miServo;
+int pinServo = 10;
+int pinBoton = 2;
+
+bool estado = false;     // false: cerrado (0°), true: abierto (90°)
+bool botonPresionado = false;
+
+void setup() {
+  miServo.attach(pinServo);
+  pinMode(pinBoton, INPUT_PULLUP); // Botón con resistencia interna pull-up
+  miServo.write(0); // Posición inicial cerrada
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (digitalRead(pinBoton) == LOW) {
+    if (!botonPresionado) {
+      botonPresionado = true;
+      estado = !estado; // Cambia de abierto a cerrado y viceversa
+
+      if (estado) {
+        // Abrir: de 0° a 90° lentamente
+        for (int angulo = 0; angulo <= 90; angulo++) {
+          miServo.write(angulo);
+          delay(15); // Velocidad del movimiento
+        }
+        Serial.println("Puerta abierta");
+      } else {
+        // Cerrar: de 90° a 0° lentamente
+        for (int angulo = 90; angulo >= 0; angulo--) {
+          miServo.write(angulo);
+          delay(15);
+        }
+        Serial.println("Puerta cerrada");
+      }
+    }
+  } else {
+    botonPresionado = false;
+  }
+}
